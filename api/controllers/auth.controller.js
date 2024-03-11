@@ -13,7 +13,7 @@ export const signup = async (req, res, next) => {
     email === "" ||
     password === ""
   ) {
-    next(errorHandler(400, "Tutti i campi sono richiesti"));
+    return next(errorHandler(400, "Tutti i campi sono richiesti"));
   }
 
   const hashPassword = bcryptjs.hashSync(password, 10);
@@ -29,6 +29,6 @@ export const signup = async (req, res, next) => {
 
     res.json("User salvato con successo");
   } catch (error) {
-    next(error);
+    next(errorHandler(404, "Nome utente o email già esistenti."));
   }
 };
