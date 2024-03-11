@@ -1,3 +1,3 @@
 export default function SignIn() {
-  return <div>SignIn</div>;
+  return <div className="flex-1 h-screen border-2">SignIn</div>;
 }

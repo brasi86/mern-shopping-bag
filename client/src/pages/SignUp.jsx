@@ -46,7 +46,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className=" min-h-screen mt-20">
+    <div className="mt-20 mb-10 flex-1">
       <div className="wrapper | px-4 max-w-4xl mx-auto flex flex-col md:flex-row md:items-center gap-6">
         <div className="left-side | flex-1  text-center md:text-left">
           <Link to="/" className="text-4xl font-semibold dark:text-white">
@@ -57,7 +57,7 @@ export default function SignUp() {
           </Link>
           <p className="text-center md:text-left mt-6">
             La tua shopping bag online. Puoi registrarti con la tua mail e
-            passaword oppure con Google.
+            password oppure con Google.
           </p>
         </div>
         <div className="right-side | flex-1">
