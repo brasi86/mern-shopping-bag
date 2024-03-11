@@ -20,7 +20,9 @@ export default function Header() {
           <FaMoon />
         </Button>
         <Link to="/sign-up">
-          <Button gradientDuoTone="purpleToBlue">Registrati</Button>
+          <Button gradientDuoTone="purpleToBlue" outline>
+            Registrati
+          </Button>
         </Link>
         <NavbarToggle />
       </div>
