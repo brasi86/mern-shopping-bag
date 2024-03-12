@@ -21,11 +21,13 @@ export default function DashProfile() {
   const [formData, setFormData] = useState({});
   const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
   const [updateUserError, setUpdateUserError] = useState(null);
+
   const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUpdateProgress, setImageFileUpdateProgress] = useState(null);
   const [imageFileUpdateError, setImageFileUpdateError] = useState(null);
   const filePickerRef = useRef();
+
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
