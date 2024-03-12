@@ -3,6 +3,8 @@ import { HiUser } from "react-icons/hi";
 import { CiLogout } from "react-icons/ci";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { FaShoppingBag } from "react-icons/fa";
 
 export default function DashSidebar() {
   const location = useLocation();
@@ -20,13 +22,27 @@ export default function DashSidebar() {
   return (
     <Sidebar className="w-full">
       <Sidebar.Items>
-        <Sidebar.ItemGroup>
+        <Sidebar.ItemGroup className=" space-y-2">
           <Link to="/dashboard?tab=profile">
             <Sidebar.Item as="div" active={tab === "profile"} icon={HiUser}>
               Profilo
             </Sidebar.Item>
           </Link>
+          <Link to="/dashboard?tab=shoppingbag">
+            <Sidebar.Item
+              as="div"
+              active={tab === "shoppingbag"}
+              icon={FaShoppingBag}
+            >
+              Shopping Bag
+            </Sidebar.Item>
+          </Link>
           <Sidebar.Item icon={CiLogout}>Log Out</Sidebar.Item>
+          <Sidebar.ItemGroup>
+            <Sidebar.Item className=" text-red-500" icon={RiDeleteBin6Line}>
+              Elimina Account
+            </Sidebar.Item>
+          </Sidebar.ItemGroup>
         </Sidebar.ItemGroup>
       </Sidebar.Items>
     </Sidebar>
