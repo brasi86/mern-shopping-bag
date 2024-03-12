@@ -21,11 +21,11 @@ export default function DashProfile() {
   const [formData, setFormData] = useState({});
   const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
   const [updateUserError, setUpdateUserError] = useState(null);
-
   const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUpdateProgress, setImageFileUpdateProgress] = useState(null);
   const [imageFileUpdateError, setImageFileUpdateError] = useState(null);
+  const [imageUploading, setImageUploading] = useState(false);
   const filePickerRef = useRef();
 
   const dispatch = useDispatch();
@@ -49,7 +49,11 @@ export default function DashProfile() {
     setUpdateUserError(null);
 
     if (Object.keys(formData).length === 0) {
-      setUpdateUserError("Non hai modificato nessun campo");
+      setUpdateUserError("Non hai modificato nessun campo.");
+      return;
+    }
+
+    if (imageUploading) {
       return;
     }
 
@@ -82,6 +86,7 @@ export default function DashProfile() {
   }, [imageFile]);
 
   const uploadImage = async () => {
+    setImageUploading(true);
     /* service firebase.storage {
       match /b/{bucket}/o {
         match /{allPaths=**} {
@@ -110,13 +115,27 @@ export default function DashProfile() {
         setImageFileUpdateProgress(null);
         setImageFileUrl(null);
         setImageFile(null);
+        setImageUploading(false);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setImageFileUrl(downloadURL);
+          setFormData({ ...formData, profilePicture: downloadURL });
+          setImageUploading(false);
         });
       }
     );
+  };
+
+  const removeAvatar = () => {
+    setImageFileUrl(
+      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+    );
+    setFormData({
+      ...formData,
+      profilePicture:
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
+    });
   };
 
   return (
@@ -164,6 +183,12 @@ export default function DashProfile() {
             alt="userPic"
           />
         </div>
+        <button
+          onClick={removeAvatar}
+          className="max-w-fit mx-auto border-none text-black"
+        >
+          Rimuovi Avatar
+        </button>
         {imageFileUpdateError && (
           <Alert color="failure">{imageFileUpdateError}</Alert>
         )}
