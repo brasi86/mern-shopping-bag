@@ -11,12 +11,32 @@ import { Link, useLocation } from "react-router-dom";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/theme/themeSlice";
+import { logoutSucces } from "../redux/user/userSlice";
 
 export default function Header() {
   const path = useLocation().pathname;
   const { currentUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const { theme } = useSelector((state) => state.theme);
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/user/logout", {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(logoutSucces(data));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Navbar className="border-b-2">
       <Link
@@ -55,7 +75,8 @@ export default function Header() {
               <DropdownItem>Profilo</DropdownItem>
             </Link>
             <DropdownDivider />
-            <DropdownItem>Logout</DropdownItem>
+
+            <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
           </Dropdown>
         ) : (
           <Link to="/sign-up">
