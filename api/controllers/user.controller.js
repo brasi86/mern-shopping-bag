@@ -66,3 +66,16 @@ export const updateUser = async (req, res, next) => {
     next("error");
   }
 };
+
+export const deleteUser = async (req, res, next) => {
+  if (req.user.id !== req.params.userId) {
+    return next(errorHandler(403, "Impossibile eliminare questo account."));
+  }
+
+  try {
+    await User.findByIdAndDelete(req.params.userId);
+    res.status(200).json("Account eliminato con successo");
+  } catch (error) {
+    next(error);
+  }
+};
