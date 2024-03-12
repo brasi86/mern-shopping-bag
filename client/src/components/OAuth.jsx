@@ -3,7 +3,7 @@ import { FaGoogle } from "react-icons/fa";
 import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
 import { app } from "../firebase";
 import { useDispatch } from "react-redux";
-import { signInSuccess } from "../redux/user/userSlice";
+import { signInFailure, signInSuccess } from "../redux/user/userSlice";
 import { useNavigate } from "react-router-dom";
 
 export default function OAuth() {
@@ -31,7 +31,7 @@ export default function OAuth() {
         navigate("/");
       }
     } catch (error) {
-      console.log(error);
+      dispatch(signInFailure(error.message));
     }
   };
 

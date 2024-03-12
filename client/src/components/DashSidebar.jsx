@@ -3,7 +3,6 @@ import { HiUser } from "react-icons/hi";
 import { CiLogout } from "react-icons/ci";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { RiDeleteBin6Line } from "react-icons/ri";
 import { FaShoppingBag } from "react-icons/fa";
 
 export default function DashSidebar() {
@@ -38,11 +37,6 @@ export default function DashSidebar() {
             </Sidebar.Item>
           </Link>
           <Sidebar.Item icon={CiLogout}>Log Out</Sidebar.Item>
-          <Sidebar.ItemGroup>
-            <Sidebar.Item className=" text-red-500" icon={RiDeleteBin6Line}>
-              Elimina Account
-            </Sidebar.Item>
-          </Sidebar.ItemGroup>
         </Sidebar.ItemGroup>
       </Sidebar.Items>
     </Sidebar>
