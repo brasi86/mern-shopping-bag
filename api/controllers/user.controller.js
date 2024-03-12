@@ -44,25 +44,24 @@ export const updateUser = async (req, res, next) => {
         errorHandler(400, "Il nome utente può contenere solo lettere e numeri.")
       );
     }
-
-    try {
-      const updateUser = await User.findByIdAndUpdate(
-        req.params.userId,
-        {
-          $set: {
-            username: req.body.username,
-            email: req.body.email,
-            password: req.body.password,
-          },
+  }
+  try {
+    const updateUser = await User.findByIdAndUpdate(
+      req.params.userId,
+      {
+        $set: {
+          username: req.body.username,
+          email: req.body.email,
+          password: req.body.password,
         },
-        { new: true }
-      );
+      },
+      { new: true }
+    );
 
-      const { password, ...rest } = updateUser._doc;
+    const { password, ...rest } = updateUser._doc;
 
-      res.status(200).json(rest);
-    } catch (error) {
-      next("error");
-    }
+    res.status(200).json(rest);
+  } catch (error) {
+    next("error");
   }
 };
