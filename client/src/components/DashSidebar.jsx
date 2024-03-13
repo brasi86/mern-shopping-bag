@@ -6,6 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 import { FaShoppingBag } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { logoutSucces } from "../redux/user/userSlice";
+import { MdDashboard } from "react-icons/md";
 
 export default function DashSidebar() {
   const location = useLocation();
@@ -41,29 +42,34 @@ export default function DashSidebar() {
 
   return (
     <Sidebar className="w-full">
-      <Sidebar.Items>
-        <Sidebar.ItemGroup className=" space-y-2">
-          <Link to="/dashboard?tab=profile">
-            <Sidebar.Item as="div" active={tab === "profile"} icon={HiUser}>
-              Profilo
-            </Sidebar.Item>
-          </Link>
-          <Link to="/dashboard?tab=shoppingbag">
-            <Sidebar.Item
-              as="div"
-              active={tab === "shoppingbag"}
-              icon={FaShoppingBag}
-            >
-              Shopping Bag
-            </Sidebar.Item>
-          </Link>
-          <Link onClick={handleLogout}>
-            <Sidebar.Item as="div" icon={CiLogout}>
-              Log Out
-            </Sidebar.Item>
-          </Link>
-        </Sidebar.ItemGroup>
-      </Sidebar.Items>
+      <Sidebar.ItemGroup className="">
+        <Link to="/dashboard?tab=dash">
+          <Sidebar.Item as="div" active={tab === "dash"} icon={MdDashboard}>
+            Dashboard
+          </Sidebar.Item>
+        </Link>
+        <Link to="/dashboard?tab=shoppingbag">
+          <Sidebar.Item
+            as="div"
+            active={tab === "shoppingbag"}
+            icon={FaShoppingBag}
+          >
+            Shopping Bag
+          </Sidebar.Item>
+        </Link>
+      </Sidebar.ItemGroup>
+      <Sidebar.ItemGroup>
+        <Link to="/dashboard?tab=profile">
+          <Sidebar.Item as="div" active={tab === "profile"} icon={HiUser}>
+            Profilo
+          </Sidebar.Item>
+        </Link>
+        <Link onClick={handleLogout}>
+          <Sidebar.Item as="div" icon={CiLogout}>
+            Log Out
+          </Sidebar.Item>
+        </Link>
+      </Sidebar.ItemGroup>
     </Sidebar>
   );
 }

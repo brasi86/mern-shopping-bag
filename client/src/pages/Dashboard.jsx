@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import DashSidebar from "../components/DashSidebar";
 import DashProfile from "../components/DashProfile";
-import ShoppingBag from "./ShoppingBag";
+import ShoppingBag from "../components/ShoppingBag";
 
 export default function Dashboard() {
   const location = useLocation();
@@ -23,8 +23,10 @@ export default function Dashboard() {
         <DashSidebar />
       </div>
       <div className="right-side w-full">
-        {tab === "profile" && <DashProfile />}
-        {tab === "shoppingbag" && <ShoppingBag />}
+        <div className=" px-8 py-6">
+          {tab === "profile" && <DashProfile />}
+          {tab === "shoppingbag" && <ShoppingBag />}
+        </div>
       </div>
     </div>
   );

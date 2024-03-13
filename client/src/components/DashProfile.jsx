@@ -21,7 +21,7 @@ import "react-circular-progressbar/dist/styles.css";
 import { FaExclamationCircle } from "react-icons/fa";
 
 export default function DashProfile() {
-  const { currentUser, error } = useSelector((state) => state.user);
+  const { currentUser, loading } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({});
   const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
   const [updateUserError, setUpdateUserError] = useState(null);
@@ -210,7 +210,7 @@ export default function DashProfile() {
         </div>
         <button
           onClick={removeAvatar}
-          className="max-w-fit mx-auto border-none text-black"
+          className="max-w-fit mx-auto border-none text-black dark:text-gray-400"
         >
           Rimuovi Avatar
         </button>
@@ -241,15 +241,16 @@ export default function DashProfile() {
           className=" max-w-fit mx-auto"
           type="submit"
           gradientDuoTone="purpleToBlue"
+          disabled={loading || imageUploading}
         >
-          Aggiorna dati
+          {loading ? "Aggiornamento" : "Aggiorna dati"}
         </Button>
         {updateUserSuccess && (
           <Alert color="success">{updateUserSuccess}</Alert>
         )}
         {updateUserError && <Alert color="failure">{updateUserError}</Alert>}
       </form>
-      {error && <Alert color="failure">{error}</Alert>}
+
       <button onClick={() => setShowModal(true)} className="mt-5 text-red-500">
         Elimina Account
       </button>
