@@ -1,29 +1,62 @@
-import { Button, TextInput } from "flowbite-react";
+import { Alert, Button, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function ShoppingBag() {
   const [formData, setFormData] = useState({});
   const { currentUser } = useSelector((state) => state.user);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const handleSubmit = (e) => {
-    setFormData({ ...formData, complete: false });
-
-    e.preventDefault();
+  const handleChange = (e) => {
+    setFormData({ ...formData, task: e.target.value, userId: currentUser._id });
   };
-  console.log(formData);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    e.target[0].value = "";
+    setFormData({});
+
+    if (!formData || !formData.task) {
+      return setErrorMessage("Non hai inserito un articolo.");
+    }
+
+    try {
+      const res = await fetch("/api/task/addtask", {
+        method: "POST",
+        headers: { "Content-Type": "Application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        return setErrorMessage(data.message);
+      }
+
+      console.log(data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   return (
     <div>
       <h2 className="text-center text-3xl mb-4">Shopping Bag</h2>
       <form onSubmit={handleSubmit} className="flex gap-2 max-w-lg mx-auto">
         <TextInput
-          onChange={(e) => setFormData({ ...formData, task: e.target.value })}
+          onChange={handleChange}
           className="flex-1"
           placeholder="Inserisci Articolo"
         />
         <Button type="submit">Aggiungi</Button>
       </form>
+      {errorMessage && (
+        <Alert className="mt-2" color="failure">
+          {errorMessage}
+        </Alert>
+      )}
+      <div>task</div>
     </div>
   );
 }
