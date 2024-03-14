@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import DashSidebar from "../components/DashSidebar";
 import DashProfile from "../components/DashProfile";
 import ShoppingBag from "../components/ShoppingBag";
+import NucleoFam from "../components/NucleoFam";
 
 export default function Dashboard() {
   const location = useLocation();
@@ -26,6 +27,7 @@ export default function Dashboard() {
         <div className=" px-4 py-6 ">
           {tab === "profile" && <DashProfile />}
           {tab === "shoppingbag" && <ShoppingBag />}
+          {tab === "nucleo" && <NucleoFam />}
         </div>
       </div>
     </div>

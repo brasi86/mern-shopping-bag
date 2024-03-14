@@ -1,4 +1,4 @@
-import { Alert, Button, Table, TableCell, TextInput } from "flowbite-react";
+import { Alert, Button, Table, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { FaRegEdit } from "react-icons/fa";
@@ -169,7 +169,11 @@ export default function ShoppingBag() {
               {allTasks.map((task, index) => (
                 <Table.Body key={index}>
                   <Table.Row
-                    className={task.complete ? "bg-green-400 text-black" : ""}
+                    className={
+                      task.complete
+                        ? "bg-green-400 text-black hover:bg-green-400 dark:hover:bg-green-400"
+                        : ""
+                    }
                   >
                     <Table.Cell>
                       {new Date(task.updatedAt).toLocaleDateString()}

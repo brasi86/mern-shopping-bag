@@ -1,5 +1,6 @@
 import { errorHandler } from "../utils/error.js";
 import Task from "../models/task.model.js";
+import User from "../models/user.model.js";
 
 export const addTask = async (req, res, next) => {
   const { task, userId } = req.body;
@@ -30,7 +31,12 @@ export const addTask = async (req, res, next) => {
 
 export const getTasks = async (req, res, next) => {
   try {
-    const allTasks = await Task.find({ userId: req.query.userId });
+    const usersInSameNucleo = await User.find({
+      nucleo: req.user.nucleo,
+    });
+    const userIds = usersInSameNucleo.map((user) => user._id);
+
+    const allTasks = await Task.find({ userId: { $in: userIds } });
     const totalTasks = await Task.countDocuments({ userId: req.query.userId });
 
     res.status(200).json({ allTasks, totalTasks });
@@ -40,10 +46,16 @@ export const getTasks = async (req, res, next) => {
 };
 
 export const deleteTasks = async (req, res, next) => {
-  if (req.params.userId !== req.body.userId) {
-    return next(errorHandler(402, "Non posso eliminare questo articolo"));
-  }
   try {
+    const usersInSameNucleo = await User.find({
+      nucleo: req.user.nucleo,
+    });
+    const userIds = usersInSameNucleo.map((user) => user._id);
+
+    if (!userIds.some((id) => id.toString() === req.params.userId)) {
+      return errorHandler(403, "Non puoi eliminare questo articolo.");
+    }
+
     await Task.findByIdAndDelete(req.body._id);
     res.status(200).json("La task è stata eliminata");
   } catch (error) {
@@ -52,8 +64,13 @@ export const deleteTasks = async (req, res, next) => {
 };
 
 export const updateTasks = async (req, res, next) => {
-  if (req.params.userId !== req.body.userId) {
-    return next(errorHandler(402, "Non posso eliminare questo articolo"));
+  const usersInSameNucleo = await User.find({
+    nucleo: req.user.nucleo,
+  });
+  const userIds = usersInSameNucleo.map((user) => user._id);
+
+  if (!userIds.some((id) => id.toString() === req.params.userId)) {
+    return errorHandler(403, "Non puoi modificare questo articolo.");
   }
 
   const taskDuplicate = await Task.find({ task: req.body.task });

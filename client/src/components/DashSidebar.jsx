@@ -7,6 +7,7 @@ import { FaShoppingBag } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { logoutSucces } from "../redux/user/userSlice";
 import { MdDashboard } from "react-icons/md";
+import { PiUsersFourFill } from "react-icons/pi";
 
 export default function DashSidebar() {
   const location = useLocation();
@@ -55,6 +56,15 @@ export default function DashSidebar() {
             icon={FaShoppingBag}
           >
             Shopping Bag
+          </Sidebar.Item>
+        </Link>
+        <Link to="/dashboard?tab=nucleo">
+          <Sidebar.Item
+            as="div"
+            active={tab === "nucleo"}
+            icon={PiUsersFourFill}
+          >
+            Nucleo famigliare
           </Sidebar.Item>
         </Link>
       </Sidebar.ItemGroup>
