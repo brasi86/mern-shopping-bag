@@ -6,6 +6,7 @@ export default function ShoppingBag() {
   const [formData, setFormData] = useState({});
   const { currentUser } = useSelector((state) => state.user);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [allTasks, setAllTasks] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, task: e.target.value, userId: currentUser._id });
@@ -33,12 +34,17 @@ export default function ShoppingBag() {
       if (data.success === false) {
         return setErrorMessage(data.message);
       }
-
-      console.log(data);
     } catch (error) {
       console.log(error.message);
     }
   };
+
+  useState(() => {
+    fetch(`/api/task/gettasks?userId=${currentUser._id}`)
+      .then((response) => response.json())
+      .then((data) => setAllTasks(data.allTasks))
+      .catch((err) => console.log(err));
+  }, [currentUser._id]);
 
   return (
     <div>
@@ -56,7 +62,13 @@ export default function ShoppingBag() {
           {errorMessage}
         </Alert>
       )}
-      <div>task</div>
+      <div>
+        <ul>
+          {allTasks && allTasks?.length > 0
+            ? allTasks.map((task, index) => <li key={index}> {task.task} </li>)
+            : "Non hai inserito alcun articolo"}
+        </ul>
+      </div>
     </div>
   );
 }

@@ -8,7 +8,7 @@ export default function FooterComponent() {
     >
       <FooterCopyright
         className="text-white mx-auto"
-        by="FULL STACK - Mern APP "
+        by="FULL STACK - MERN APP "
         year={new Date().getFullYear()}
       />
     </Footer>

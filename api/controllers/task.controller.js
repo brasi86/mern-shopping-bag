@@ -27,3 +27,14 @@ export const addTask = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getTasks = async (req, res, next) => {
+  try {
+    const allTasks = await Task.find({ userId: req.query.userId });
+    const totalTasks = await Task.countDocuments({ userId: req.query.userId });
+
+    res.status(200).json({ allTasks, totalTasks });
+  } catch (error) {
+    next(error);
+  }
+};
