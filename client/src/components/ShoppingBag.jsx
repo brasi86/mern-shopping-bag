@@ -6,6 +6,7 @@ import { MdDeleteForever } from "react-icons/md";
 import { IoCloseCircle } from "react-icons/io5";
 import { TiTick } from "react-icons/ti";
 import { IoMdClose } from "react-icons/io";
+import { RiCheckboxCircleFill } from "react-icons/ri";
 
 export default function ShoppingBag() {
   const [formData, setFormData] = useState({});
@@ -15,6 +16,7 @@ export default function ShoppingBag() {
   const [totaleTasks, setTotaleAllTasks] = useState(null);
   const [editingRow, setEditingRow] = useState(null);
   const [editedValue, setEditedValue] = useState("");
+  const [prevValue, setPrevValue] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, task: e.target.value, userId: currentUser._id });
@@ -74,6 +76,7 @@ export default function ShoppingBag() {
   const handleEdit = async (task, index) => {
     setEditedValue(task.task);
     setEditingRow(index);
+    setPrevValue(task.task);
   };
 
   const handleInputChange = (e) => {
@@ -85,16 +88,47 @@ export default function ShoppingBag() {
     updatedTasks[editingRow].task = editedValue;
 
     try {
-      await fetch(`/api/task/updateTasks/${currentUser._id}`, {
+      const res = await fetch(`/api/task/updateTasks/${currentUser._id}`, {
         method: "PUT",
         headers: { "Content-Type": "Application/json" },
         body: JSON.stringify(updatedTasks[editingRow]),
       });
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        if (prevValue === editedValue) {
+          return setEditingRow(null);
+        }
+        updatedTasks[editingRow].task = prevValue;
+        return setErrorMessage(data.message);
+      }
+
+      setAllTasks(updatedTasks);
+      setEditingRow(null);
     } catch (error) {
       console.log(error.message);
     }
+  };
 
-    setAllTasks(updatedTasks);
+  const handleCompleteTask = async (index) => {
+    const toggleComplete = [...allTasks];
+
+    toggleComplete[index] = {
+      ...toggleComplete[index],
+      complete: !toggleComplete[index].complete,
+    };
+
+    setAllTasks(toggleComplete);
+  };
+
+  const handleCloseEdit = () => {
+    if (errorMessage) {
+      setErrorMessage(null);
+      setEditingRow(null);
+      setEditedValue(prevValue);
+    }
+
     setEditingRow(null);
   };
 
@@ -134,7 +168,9 @@ export default function ShoppingBag() {
               </Table.Head>
               {allTasks.map((task, index) => (
                 <Table.Body key={index}>
-                  <Table.Row>
+                  <Table.Row
+                    className={task.complete ? "bg-green-400 text-black" : ""}
+                  >
                     <Table.Cell>
                       {new Date(task.updatedAt).toLocaleDateString()}
                     </Table.Cell>
@@ -152,8 +188,12 @@ export default function ShoppingBag() {
                       </Table.Cell>
                     )}
 
-                    <Table.Cell>
-                      <IoCloseCircle className=" text-red-600 w-5 h-5 mx-auto" />
+                    <Table.Cell onClick={() => handleCompleteTask(index)}>
+                      {task.complete ? (
+                        <RiCheckboxCircleFill className=" text-green-800 w-5 h-5 mx-auto" />
+                      ) : (
+                        <IoCloseCircle className=" text-red-600 w-5 h-5 mx-auto" />
+                      )}
                     </Table.Cell>
 
                     {editingRow === index ? (
@@ -161,7 +201,7 @@ export default function ShoppingBag() {
                         <Button onClick={handleSaveUpdateTask}>
                           <TiTick />
                         </Button>
-                        <Button onClick={() => setEditingRow(null)}>
+                        <Button onClick={() => handleCloseEdit(task)}>
                           <IoMdClose />
                         </Button>
                       </Table.Cell>

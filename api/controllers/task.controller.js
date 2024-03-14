@@ -8,7 +8,7 @@ export const addTask = async (req, res, next) => {
     return errorHandler(404, "Non puoi effettuare questa operazione.");
   }
 
-  const taskDuplicate = await Task.find({ task: task });
+  const taskDuplicate = await Task.find({ userId: req.user.id, task: task });
 
   if (taskDuplicate.length > 0) {
     return next(errorHandler(402, "Articolo già inserito."));
@@ -56,6 +56,12 @@ export const updateTasks = async (req, res, next) => {
     return next(errorHandler(402, "Non posso eliminare questo articolo"));
   }
 
+  const taskDuplicate = await Task.find({ task: req.body.task });
+
+  if (taskDuplicate.length > 0) {
+    return next(errorHandler(402, "Articolo già inserito."));
+  }
+
   try {
     const updateTasks = await Task.findByIdAndUpdate(
       req.body._id,
@@ -68,7 +74,6 @@ export const updateTasks = async (req, res, next) => {
       },
       { new: true }
     );
-    console.log(req.body);
 
     res.status(200).json(updateTasks);
   } catch (error) {
