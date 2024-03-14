@@ -42,7 +42,7 @@ export default function DashSidebar() {
 
   return (
     <Sidebar className="w-full">
-      <Sidebar.ItemGroup className="">
+      <Sidebar.ItemGroup>
         <Link to="/dashboard?tab=dash">
           <Sidebar.Item as="div" active={tab === "dash"} icon={MdDashboard}>
             Dashboard

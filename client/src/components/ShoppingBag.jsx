@@ -1,9 +1,11 @@
-import { Alert, Button, Table, TextInput } from "flowbite-react";
+import { Alert, Button, Table, TableCell, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { FaRegEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import { IoCloseCircle } from "react-icons/io5";
+import { TiTick } from "react-icons/ti";
+import { IoMdClose } from "react-icons/io";
 
 export default function ShoppingBag() {
   const [formData, setFormData] = useState({});
@@ -11,6 +13,8 @@ export default function ShoppingBag() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [allTasks, setAllTasks] = useState(null);
   const [totaleTasks, setTotaleAllTasks] = useState(null);
+  const [editingRow, setEditingRow] = useState(null);
+  const [editedValue, setEditedValue] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, task: e.target.value, userId: currentUser._id });
@@ -55,17 +59,43 @@ export default function ShoppingBag() {
 
   const handleDelete = async (task) => {
     try {
-      await fetch("/api/task/deleteTasks", {
+      await fetch(`/api/task/deleteTasks/${currentUser._id}`, {
         method: "DELETE",
         headers: { "Content-Type": "Application/json" },
         body: JSON.stringify(task),
       });
 
-      const updatedTasks = allTasks.filter((t) => t !== task);
-      setAllTasks(updatedTasks);
+      setAllTasks(allTasks.filter((t) => t !== task));
     } catch (error) {
       console.log(error.message);
     }
+  };
+
+  const handleEdit = async (task, index) => {
+    setEditedValue(task.task);
+    setEditingRow(index);
+  };
+
+  const handleInputChange = (e) => {
+    setEditedValue(e.target.value);
+  };
+
+  const handleSaveUpdateTask = async () => {
+    const updatedTasks = [...allTasks];
+    updatedTasks[editingRow].task = editedValue;
+
+    try {
+      await fetch(`/api/task/updateTasks/${currentUser._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "Application/json" },
+        body: JSON.stringify(updatedTasks[editingRow]),
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+
+    setAllTasks(updatedTasks);
+    setEditingRow(null);
   };
 
   return (
@@ -83,7 +113,7 @@ export default function ShoppingBag() {
         <Button type="submit">Aggiungi</Button>
       </form>
       {errorMessage && (
-        <Alert className="mt-2" color="failure">
+        <Alert className="mt-2 max-w-lg mx-auto" color="failure">
           {errorMessage}
         </Alert>
       )}
@@ -108,18 +138,47 @@ export default function ShoppingBag() {
                     <Table.Cell>
                       {new Date(task.updatedAt).toLocaleDateString()}
                     </Table.Cell>
-                    <Table.Cell className=" font-bold">{task.task}</Table.Cell>
+                    {editingRow === index ? (
+                      <Table.Cell className=" font-bold">
+                        <TextInput
+                          type="text"
+                          value={editedValue}
+                          onChange={handleInputChange}
+                        />
+                      </Table.Cell>
+                    ) : (
+                      <Table.Cell className=" font-bold">
+                        {task.task}
+                      </Table.Cell>
+                    )}
+
                     <Table.Cell>
                       <IoCloseCircle className=" text-red-600 w-5 h-5 mx-auto" />
                     </Table.Cell>
-                    <Table.Cell>
-                      <FaRegEdit className="w-5 h-5 mx-auto" />
-                    </Table.Cell>
+
+                    {editingRow === index ? (
+                      <Table.Cell className="cursor-pointer flex gap-2 justify-center">
+                        <Button onClick={handleSaveUpdateTask}>
+                          <TiTick />
+                        </Button>
+                        <Button onClick={() => setEditingRow(null)}>
+                          <IoMdClose />
+                        </Button>
+                      </Table.Cell>
+                    ) : (
+                      <Table.Cell
+                        className="cursor-pointer"
+                        onClick={() => handleEdit(task, index)}
+                      >
+                        <FaRegEdit className="w-5 h-5 mx-auto" />
+                      </Table.Cell>
+                    )}
+
                     <Table.Cell
                       className=" cursor-pointer"
                       onClick={() => handleDelete(task)}
                     >
-                      <MdDeleteForever className="w-5 h-5 flex mx-auto" />
+                      <MdDeleteForever className="w-5 h-5 flex mx-auto text-red-600" />
                     </Table.Cell>
                   </Table.Row>
                 </Table.Body>

@@ -40,10 +40,37 @@ export const getTasks = async (req, res, next) => {
 };
 
 export const deleteTasks = async (req, res, next) => {
+  if (req.params.userId !== req.body.userId) {
+    return next(errorHandler(402, "Non posso eliminare questo articolo"));
+  }
   try {
-    const deleteTask = await Task.findByIdAndDelete(req.body._id);
+    await Task.findByIdAndDelete(req.body._id);
+    res.status(200).json("La task è stata eliminata");
+  } catch (error) {
+    next(error);
+  }
+};
 
-    res.status(200).json("ok");
+export const updateTasks = async (req, res, next) => {
+  if (req.params.userId !== req.body.userId) {
+    return next(errorHandler(402, "Non posso eliminare questo articolo"));
+  }
+
+  try {
+    const updateTasks = await Task.findByIdAndUpdate(
+      req.body._id,
+      {
+        $set: {
+          task: req.body.task,
+          complete: req.body.complete,
+          userId: req.body.userId,
+        },
+      },
+      { new: true }
+    );
+    console.log(req.body);
+
+    res.status(200).json(updateTasks);
   } catch (error) {
     next(error);
   }
