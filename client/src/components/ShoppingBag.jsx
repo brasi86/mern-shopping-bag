@@ -1,6 +1,9 @@
-import { Alert, Button, TextInput } from "flowbite-react";
+import { Alert, Button, Table, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { FaRegEdit } from "react-icons/fa";
+import { MdDeleteForever } from "react-icons/md";
+import { IoCloseCircle } from "react-icons/io5";
 
 export default function ShoppingBag() {
   const [formData, setFormData] = useState({});
@@ -30,10 +33,10 @@ export default function ShoppingBag() {
       });
 
       const data = await res.json();
-
       if (data.success === false) {
         return setErrorMessage(data.message);
       }
+      setAllTasks([...allTasks, data]);
     } catch (error) {
       console.log(error.message);
     }
@@ -49,7 +52,10 @@ export default function ShoppingBag() {
   return (
     <div>
       <h2 className="text-center text-3xl mb-4">Shopping Bag</h2>
-      <form onSubmit={handleSubmit} className="flex gap-2 max-w-lg mx-auto">
+      <form
+        onSubmit={handleSubmit}
+        className="flex gap-2 max-w-lg mx-auto px-1"
+      >
         <TextInput
           onChange={handleChange}
           className="flex-1"
@@ -62,12 +68,45 @@ export default function ShoppingBag() {
           {errorMessage}
         </Alert>
       )}
-      <div>
-        <ul>
-          {allTasks && allTasks?.length > 0
-            ? allTasks.map((task, index) => <li key={index}> {task.task} </li>)
-            : "Non hai inserito alcun articolo"}
-        </ul>
+      <div className="table-auto overflow-x-scroll  max-w-4xl md:mx-auto scrollbar py-5 px-1">
+        {allTasks && allTasks?.length > 0 ? (
+          <>
+            <Table hoverable className="shadow-md">
+              <Table.Head className="">
+                <Table.HeadCell>Data</Table.HeadCell>
+                <Table.HeadCell>Articolo</Table.HeadCell>
+                <Table.HeadCell className="text-center">
+                  Completato
+                </Table.HeadCell>
+                <Table.HeadCell className="text-center">
+                  <span>Modifica</span>
+                </Table.HeadCell>
+                <Table.HeadCell className="text-center">Elimina</Table.HeadCell>
+              </Table.Head>
+              {allTasks.map((task, index) => (
+                <Table.Body key={index}>
+                  <Table.Row>
+                    <Table.Cell>
+                      {new Date(task.updatedAt).toLocaleDateString()}
+                    </Table.Cell>
+                    <Table.Cell className=" font-bold">{task.task}</Table.Cell>
+                    <Table.Cell>
+                      <IoCloseCircle className=" text-red-600 w-5 h-5 mx-auto" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <FaRegEdit className="w-5 h-5 mx-auto" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <MdDeleteForever className="w-5 h-5 flex mx-auto" />
+                    </Table.Cell>
+                  </Table.Row>
+                </Table.Body>
+              ))}
+            </Table>
+          </>
+        ) : (
+          <p>Non hai inserito alcun articolo</p>
+        )}
       </div>
     </div>
   );

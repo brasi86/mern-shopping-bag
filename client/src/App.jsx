@@ -10,7 +10,7 @@ import PrivateRoute from "./components/PrivateRoute";
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="wrapper flex flex-col  h-screen">
+      <div className="wrapper flex flex-col h-screen overflow-x-hidden">
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />

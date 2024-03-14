@@ -22,8 +22,8 @@ export default function Dashboard() {
       <div className="left-side md:min-w-56">
         <DashSidebar />
       </div>
-      <div className="right-side w-full">
-        <div className=" px-8 py-6">
+      <div className="right-side w-full dark:bg-[#1e1e1e]">
+        <div className=" px-4 py-6 ">
           {tab === "profile" && <DashProfile />}
           {tab === "shoppingbag" && <ShoppingBag />}
         </div>
