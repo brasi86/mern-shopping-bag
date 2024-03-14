@@ -38,3 +38,13 @@ export const getTasks = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteTasks = async (req, res, next) => {
+  try {
+    const deleteTask = await Task.findByIdAndDelete(req.body._id);
+
+    res.status(200).json("ok");
+  } catch (error) {
+    next(error);
+  }
+};

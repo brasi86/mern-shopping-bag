@@ -10,6 +10,7 @@ export default function ShoppingBag() {
   const { currentUser } = useSelector((state) => state.user);
   const [errorMessage, setErrorMessage] = useState(null);
   const [allTasks, setAllTasks] = useState(null);
+  const [totaleTasks, setTotaleAllTasks] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, task: e.target.value, userId: currentUser._id });
@@ -45,9 +46,27 @@ export default function ShoppingBag() {
   useState(() => {
     fetch(`/api/task/gettasks?userId=${currentUser._id}`)
       .then((response) => response.json())
-      .then((data) => setAllTasks(data.allTasks))
+      .then((data) => {
+        setAllTasks(data.allTasks);
+        setTotaleAllTasks(data.totalTasks);
+      })
       .catch((err) => console.log(err));
   }, [currentUser._id]);
+
+  const handleDelete = async (task) => {
+    try {
+      await fetch("/api/task/deleteTasks", {
+        method: "DELETE",
+        headers: { "Content-Type": "Application/json" },
+        body: JSON.stringify(task),
+      });
+
+      const updatedTasks = allTasks.filter((t) => t !== task);
+      setAllTasks(updatedTasks);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   return (
     <div>
@@ -96,7 +115,10 @@ export default function ShoppingBag() {
                     <Table.Cell>
                       <FaRegEdit className="w-5 h-5 mx-auto" />
                     </Table.Cell>
-                    <Table.Cell>
+                    <Table.Cell
+                      className=" cursor-pointer"
+                      onClick={() => handleDelete(task)}
+                    >
                       <MdDeleteForever className="w-5 h-5 flex mx-auto" />
                     </Table.Cell>
                   </Table.Row>
