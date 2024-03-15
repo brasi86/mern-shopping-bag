@@ -1,12 +1,21 @@
 import { Alert, Button, TextInput } from "flowbite-react";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  updateFailure,
+  updateStart,
+  updateSuccess,
+} from "../redux/user/userSlice";
 
 export default function NucleoFam() {
   const [formData, setFormData] = useState({});
   const { currentUser } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const [errorMessage, setErrorMessage] = useState(null);
+  const [updateNucleoSuccess, setUpdateNucleoSuccess] = useState(null);
   const [searchUsers, setSearchUsers] = useState([]);
+  const [infoNucleo, setInfoNucleo] = useState(currentUser.nucleo);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -16,6 +25,7 @@ export default function NucleoFam() {
   };
 
   const handleSubmit = async (e) => {
+    setUpdateNucleoSuccess(null);
     setErrorMessage(null);
     e.preventDefault();
 
@@ -40,20 +50,87 @@ export default function NucleoFam() {
       console.log(error);
     }
   };
+
+  const copyToClipboard = () => {
+    setErrorMessage(null);
+    setInfoNucleo(infoNucleo);
+    navigator.clipboard
+      .writeText(infoNucleo)
+      .then(() => {
+        console.log("Testo copiato negli appunti: ", infoNucleo);
+      })
+      .catch((error) => {
+        console.error(
+          "Errore durante la copia del testo negli appunti: ",
+          error
+        );
+        alert(
+          "Si è verificato un errore durante la copia del testo negli appunti."
+        );
+      });
+  };
+
+  const handleChangeNucleo = async (e) => {
+    e.preventDefault();
+    setInfoNucleo(e.target.value);
+  };
+
+  const handleNucleo = async (e) => {
+    setErrorMessage(null);
+    e.preventDefault();
+
+    try {
+      dispatch(updateStart());
+      const res = await fetch(`/api/user/update/${infoNucleo}`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      dispatch(updateSuccess(data));
+      setUpdateNucleoSuccess("Aggiornato nucleo famigliare con successo.");
+
+      if (data.success === false) {
+        dispatch(updateFailure(data.message));
+        return setErrorMessage(data.message);
+      }
+    } catch (error) {
+      dispatch(updateFailure(error.message));
+      console.log(error);
+    }
+  };
+
   return (
     <div>
       <h2 className="text-center text-3xl mb-4">Nucleo famigliare</h2>
-      <form
-        onSubmit={handleSubmit}
-        className="flex gap-2 max-w-lg mx-auto px-1"
-      >
-        <TextInput
-          onChange={handleChange}
-          className="flex-1"
-          placeholder="Cerca utente"
-        />
-        <Button type="submit">Cerca</Button>
-      </form>
+
+      <div className="flex justify-center gap-10 flex-wrap-reverse">
+        <form
+          onSubmit={handleSubmit}
+          className="flex gap-2 w-full md:max-w-md lg:max-w-sm"
+        >
+          <TextInput
+            onChange={handleChange}
+            className=" w-full"
+            placeholder="Cerca utente"
+          />
+          <Button type="submit">Cerca</Button>
+        </form>
+        <form
+          onSubmit={handleNucleo}
+          className="flex gap-2 w-full md:max-w-md lg:max-w-sm"
+        >
+          <TextInput
+            onChange={handleChangeNucleo}
+            className=" w-full"
+            type="text"
+            value={infoNucleo}
+          />
+          <Button type="submit">Salva</Button>
+          <Button onClick={copyToClipboard} type="button">
+            Copia
+          </Button>
+        </form>
+      </div>
       {searchUsers &&
         searchUsers?.length > 0 &&
         searchUsers.map((user, index) => (
@@ -80,8 +157,13 @@ export default function NucleoFam() {
         ))}
 
       {errorMessage && (
-        <Alert color="failure" className="mt-5">
+        <Alert color="failure" className="mt-5 max-w-xl mx-auto">
           {errorMessage}
+        </Alert>
+      )}
+      {updateNucleoSuccess && (
+        <Alert color="success" className="mt-5 max-w-xl mx-auto">
+          {updateNucleoSuccess}
         </Alert>
       )}
     </div>

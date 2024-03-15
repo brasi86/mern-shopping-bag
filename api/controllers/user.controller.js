@@ -104,3 +104,27 @@ export const getUsers = async (req, res, next) => {
     next(error);
   }
 };
+
+export const nucleoUser = async (req, res, next) => {
+  if (req.params.nucleoId === req.user.nucleo) {
+    return next(errorHandler(404, "Appartieni già a quel nucleo famigliare."));
+  }
+
+  try {
+    const updateNucleoUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $set: {
+          nucleo: req.params.nucleoId,
+        },
+      },
+      { new: true }
+    );
+
+    const { password, ...rest } = updateNucleoUser._doc;
+
+    res.status(200).json(rest);
+  } catch (error) {
+    next("error");
+  }
+};

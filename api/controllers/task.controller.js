@@ -1,23 +1,42 @@
 import { errorHandler } from "../utils/error.js";
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
+import { query } from "express";
+
+export const getTasks = async (req, res, next) => {
+  try {
+    const allTasks = await Task.find({ nucleo: req.query.nucleo });
+    const totalTasks = await Task.countDocuments({ nucleo: req.query.nucleo });
+
+    res.status(200).json({ allTasks, totalTasks });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const addTask = async (req, res, next) => {
-  const { task, userId } = req.body;
+  const { task } = req.body;
 
-  if (req.user.id !== userId) {
-    return errorHandler(404, "Non puoi effettuare questa operazione.");
+  const { userId, nucleo } = req.query;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return next(errorHandler(404, "Utente non trovato."));
   }
 
-  const taskDuplicate = await Task.find({ userId: req.user.id, task: task });
+  const taskDuplicate = await Task.findOne({
+    nucleo: nucleo,
+    task: task,
+  });
 
-  if (taskDuplicate.length > 0) {
+  if (taskDuplicate) {
     return next(errorHandler(402, "Articolo già inserito."));
   }
 
   const newTask = new Task({
     task,
-    userId: req.user.id,
+    nucleo: nucleo,
   });
 
   try {
@@ -29,34 +48,31 @@ export const addTask = async (req, res, next) => {
   }
 };
 
-export const getTasks = async (req, res, next) => {
-  try {
-    const usersInSameNucleo = await User.find({
-      nucleo: req.user.nucleo,
-    });
-    const userIds = usersInSameNucleo.map((user) => user._id);
-
-    const allTasks = await Task.find({ userId: { $in: userIds } });
-    const totalTasks = await Task.countDocuments({ userId: req.query.userId });
-
-    res.status(200).json({ allTasks, totalTasks });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const deleteTasks = async (req, res, next) => {
+  const { task, _id } = req.body;
+
+  const { nucleo, userId } = req.query;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return next(errorHandler(404, "Utente non trovato."));
+  }
+
+  const usersInSameNucleo = await User.find({
+    nucleo: nucleo,
+  });
+
+  const userIds = usersInSameNucleo.map((user) => user._id);
+
+  console.log(userIds);
+
+  if (!userIds.some((id) => id.toString() === userId)) {
+    return next(errorHandler(403, "Non puoi eliminare questo articolo."));
+  }
+
   try {
-    const usersInSameNucleo = await User.find({
-      nucleo: req.user.nucleo,
-    });
-    const userIds = usersInSameNucleo.map((user) => user._id);
-
-    if (!userIds.some((id) => id.toString() === req.params.userId)) {
-      return errorHandler(403, "Non puoi eliminare questo articolo.");
-    }
-
-    await Task.findByIdAndDelete(req.body._id);
+    await Task.findOneAndDelete({ nucleo: nucleo, task: task, _id: _id });
     res.status(200).json("La task è stata eliminata");
   } catch (error) {
     next(error);
@@ -64,29 +80,42 @@ export const deleteTasks = async (req, res, next) => {
 };
 
 export const updateTasks = async (req, res, next) => {
+  const { task, _id } = req.body;
+
+  const { nucleo, userId } = req.query;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return next(errorHandler(404, "Utente non trovato."));
+  }
+
   const usersInSameNucleo = await User.find({
-    nucleo: req.user.nucleo,
+    nucleo: nucleo,
   });
+
   const userIds = usersInSameNucleo.map((user) => user._id);
 
-  if (!userIds.some((id) => id.toString() === req.params.userId)) {
-    return errorHandler(403, "Non puoi modificare questo articolo.");
+  if (!userIds.some((id) => id.toString() === userId)) {
+    return next(errorHandler(403, "Non puoi modificare questo articolo."));
   }
 
-  const taskDuplicate = await Task.find({ task: req.body.task });
+  const taskDuplicate = await Task.findOne({
+    nucleo: nucleo,
+    task: task,
+  });
 
-  if (taskDuplicate.length > 0) {
+  if (taskDuplicate) {
     return next(errorHandler(402, "Articolo già inserito."));
   }
-
   try {
     const updateTasks = await Task.findByIdAndUpdate(
-      req.body._id,
+      _id,
       {
         $set: {
-          task: req.body.task,
+          task: task,
           complete: req.body.complete,
-          userId: req.body.userId,
+          nucleo: nucleo,
         },
       },
       { new: true }
@@ -99,25 +128,34 @@ export const updateTasks = async (req, res, next) => {
 };
 
 export const completeTasks = async (req, res, next) => {
-  const usersInSameNucleo = await User.find({
-    nucleo: req.user.nucleo,
-  });
-  const userIds = usersInSameNucleo.map((user) => user._id);
+  const { task, _id, complete } = req.body;
 
-  if (!userIds.some((id) => id.toString() === req.params.userId)) {
-    return errorHandler(403, "Non puoi modificare questo articolo.");
+  const { nucleo, userId } = req.query;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return next(errorHandler(404, "Utente non trovato."));
   }
 
-  console.log(req.body);
+  const usersInSameNucleo = await User.find({
+    nucleo: nucleo,
+  });
+
+  const userIds = usersInSameNucleo.map((user) => user._id);
+
+  if (!userIds.some((id) => id.toString() === userId)) {
+    return next(errorHandler(403, "Non puoi modificare questo articolo."));
+  }
 
   try {
     const updateTasks = await Task.findByIdAndUpdate(
-      req.body._id,
+      _id,
       {
         $set: {
-          task: req.body.task,
-          complete: !req.body.complete,
-          userId: req.body.userId,
+          task: task,
+          complete: !complete,
+          nucleo: nucleo,
         },
       },
       { new: true }

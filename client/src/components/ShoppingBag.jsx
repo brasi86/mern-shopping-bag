@@ -33,11 +33,14 @@ export default function ShoppingBag() {
     }
 
     try {
-      const res = await fetch("/api/task/addtask", {
-        method: "POST",
-        headers: { "Content-Type": "Application/json" },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        `/api/task/addtask?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "Application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await res.json();
       if (data.success === false) {
@@ -50,7 +53,9 @@ export default function ShoppingBag() {
   };
 
   useState(() => {
-    fetch(`/api/task/gettasks?userId=${currentUser._id}`)
+    fetch(
+      `/api/task/gettasks?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`
+    )
       .then((response) => response.json())
       .then((data) => {
         setAllTasks(data.allTasks);
@@ -61,11 +66,14 @@ export default function ShoppingBag() {
 
   const handleDelete = async (task) => {
     try {
-      await fetch(`/api/task/deleteTasks/${currentUser._id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "Application/json" },
-        body: JSON.stringify(task),
-      });
+      await fetch(
+        `/api/task/deleteTasks?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "Application/json" },
+          body: JSON.stringify(task),
+        }
+      );
 
       setAllTasks(allTasks.filter((t) => t !== task));
     } catch (error) {
@@ -88,11 +96,14 @@ export default function ShoppingBag() {
     updatedTasks[editingRow].task = editedValue;
 
     try {
-      const res = await fetch(`/api/task/updateTasks/${currentUser._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "Application/json" },
-        body: JSON.stringify(updatedTasks[editingRow]),
-      });
+      const res = await fetch(
+        `/api/task/updateTasks?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "Application/json" },
+          body: JSON.stringify(updatedTasks[editingRow]),
+        }
+      );
 
       const data = await res.json();
 
@@ -114,11 +125,14 @@ export default function ShoppingBag() {
   const handleCompleteTask = async (index) => {
     const toggleComplete = [...allTasks];
 
-    const res = await fetch(`/api/task/completeTasks/${currentUser._id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "Application/json" },
-      body: JSON.stringify(toggleComplete[index]),
-    });
+    const res = await fetch(
+      `/api/task/completeTasks?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "Application/json" },
+        body: JSON.stringify(toggleComplete[index]),
+      }
+    );
 
     const data = await res.json();
 
