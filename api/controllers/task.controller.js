@@ -97,3 +97,34 @@ export const updateTasks = async (req, res, next) => {
     next(error);
   }
 };
+
+export const completeTasks = async (req, res, next) => {
+  const usersInSameNucleo = await User.find({
+    nucleo: req.user.nucleo,
+  });
+  const userIds = usersInSameNucleo.map((user) => user._id);
+
+  if (!userIds.some((id) => id.toString() === req.params.userId)) {
+    return errorHandler(403, "Non puoi modificare questo articolo.");
+  }
+
+  console.log(req.body);
+
+  try {
+    const updateTasks = await Task.findByIdAndUpdate(
+      req.body._id,
+      {
+        $set: {
+          task: req.body.task,
+          complete: !req.body.complete,
+          userId: req.body.userId,
+        },
+      },
+      { new: true }
+    );
+
+    res.status(200).json(updateTasks);
+  } catch (error) {
+    next(error);
+  }
+};

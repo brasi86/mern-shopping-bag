@@ -90,3 +90,17 @@ export const logoutUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getUsers = async (req, res, next) => {
+  const { searchUser } = req.body;
+
+  try {
+    const allUser = await User.find({
+      username: { $regex: searchUser, $options: "i" },
+    });
+
+    res.status(200).json(allUser);
+  } catch (error) {
+    next(error);
+  }
+};

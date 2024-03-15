@@ -114,6 +114,18 @@ export default function ShoppingBag() {
   const handleCompleteTask = async (index) => {
     const toggleComplete = [...allTasks];
 
+    const res = await fetch(`/api/task/completeTasks/${currentUser._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "Application/json" },
+      body: JSON.stringify(toggleComplete[index]),
+    });
+
+    const data = await res.json();
+
+    if (data.success === false) {
+      return setErrorMessage(data.message);
+    }
+
     toggleComplete[index] = {
       ...toggleComplete[index],
       complete: !toggleComplete[index].complete,
@@ -230,7 +242,7 @@ export default function ShoppingBag() {
             </Table>
           </>
         ) : (
-          <p>Non hai inserito alcun articolo</p>
+          <p className="text-center">Non hai inserito alcun articolo</p>
         )}
       </div>
     </div>
