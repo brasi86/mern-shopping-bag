@@ -1,5 +1,5 @@
-import { Alert, Button, TextInput } from "flowbite-react";
-import { useState } from "react";
+import { Alert, Button, Spinner, TextInput } from "flowbite-react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   updateFailure,
@@ -13,10 +13,11 @@ export default function NucleoFam() {
   const dispatch = useDispatch();
   const [errorMessage, setErrorMessage] = useState(null);
   const [updateNucleoSuccess, setUpdateNucleoSuccess] = useState(null);
-  const [searchUsers, setSearchUsers] = useState([]);
+  const [usersNucleo, setUsersNucleo] = useState([]);
   const [infoNucleo, setInfoNucleo] = useState(currentUser.nucleo);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+  /* const handleChange = (e) => {
     setFormData({
       ...formData,
       searchUser: e.target.value,
@@ -50,6 +51,7 @@ export default function NucleoFam() {
       console.log(error);
     }
   };
+ */
 
   const copyToClipboard = () => {
     setErrorMessage(null);
@@ -69,6 +71,27 @@ export default function NucleoFam() {
         );
       });
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `/api/user/getusers?nucleo=${currentUser.nucleo}`
+        );
+        const data = await res.json();
+
+        if (res.ok) {
+          setUsersNucleo(data.users);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.log(error);
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [currentUser.nucleo]);
 
   const handleChangeNucleo = async (e) => {
     e.preventDefault();
@@ -104,7 +127,7 @@ export default function NucleoFam() {
       <h2 className="text-center text-3xl mb-4">Nucleo famigliare</h2>
 
       <div className="flex justify-center gap-10 flex-wrap-reverse">
-        <form
+        {/* <form
           onSubmit={handleSubmit}
           className="flex gap-2 w-full md:max-w-md lg:max-w-sm"
         >
@@ -114,7 +137,7 @@ export default function NucleoFam() {
             placeholder="Cerca utente"
           />
           <Button type="submit">Cerca</Button>
-        </form>
+        </form> */}
         <form
           onSubmit={handleNucleo}
           className="flex gap-2 w-full md:max-w-md lg:max-w-sm"
@@ -131,30 +154,43 @@ export default function NucleoFam() {
           </Button>
         </form>
       </div>
-      {searchUsers &&
-        searchUsers?.length > 0 &&
-        searchUsers.map((user, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between max-w-lg mx-auto  mt-5"
-          >
-            <div className="hidden md:block ">
-              <img
-                className="w-24 h-24 rounded-full"
-                src={user.profilePicture}
-                alt="userimg"
-              />
-            </div>
-            <div className="text">
-              <p className="">
-                Nome utente: <span className="font-bold">{user.username}</span>
-              </p>
-              <p className="font-normal">Email: {user.email}</p>
-            </div>
+      {loading ? (
+        <div className="flex items-center justify-center h-[400px]">
+          <Spinner color="gray" className="w-12 h-12" />
+        </div>
+      ) : (
+        <>
+          {usersNucleo &&
+            usersNucleo?.length > 0 &&
+            usersNucleo.map((user, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between max-w-lg mx-auto  mt-5"
+              >
+                <div className="hidden md:block ">
+                  <img
+                    className="w-24 h-24 rounded-full"
+                    src={user.profilePicture}
+                    alt="userimg"
+                  />
+                </div>
+                <div className="text">
+                  <p className="">
+                    Nome utente:{" "}
+                    <span className="font-bold">
+                      {currentUser.username === user.username
+                        ? `${user.username} (Tuo profilo)`
+                        : user.username}
+                    </span>
+                  </p>
+                  <p className="font-normal">Email: {user.email}</p>
+                </div>
 
-            <Button>Aggiungi</Button>
-          </div>
-        ))}
+                <Button>Rimuovi</Button>
+              </div>
+            ))}
+        </>
+      )}
 
       {errorMessage && (
         <Alert color="failure" className="mt-5 max-w-xl mx-auto">

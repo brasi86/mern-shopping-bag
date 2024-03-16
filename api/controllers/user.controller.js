@@ -92,14 +92,16 @@ export const logoutUser = async (req, res, next) => {
 };
 
 export const getUsers = async (req, res, next) => {
-  const { searchUser } = req.body;
+  const { nucleo } = req.query;
 
   try {
-    const allUser = await User.find({
-      username: { $regex: searchUser, $options: "i" },
+    const users = await User.find({
+      ...(nucleo && { nucleo: nucleo }),
     });
 
-    res.status(200).json(allUser);
+    res.status(200).json({
+      users,
+    });
   } catch (error) {
     next(error);
   }
