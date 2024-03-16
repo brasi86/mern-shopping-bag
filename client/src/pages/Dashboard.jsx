@@ -4,6 +4,8 @@ import DashSidebar from "../components/DashSidebar";
 import DashProfile from "../components/DashProfile";
 import ShoppingBag from "../components/ShoppingBag";
 import NucleoFam from "../components/NucleoFam";
+import DashSpese from "../components/DashSpese";
+import Dash from "../components/Dash";
 
 export default function Dashboard() {
   const location = useLocation();
@@ -25,9 +27,11 @@ export default function Dashboard() {
       </div>
       <div className="right-side w-full dark:bg-[#1e1e1e]">
         <div className=" px-4 py-6 ">
+          {tab === "dash" && <Dash />}
           {tab === "profile" && <DashProfile />}
           {tab === "shoppingbag" && <ShoppingBag />}
           {tab === "nucleo" && <NucleoFam />}
+          {tab === "spese" && <DashSpese />}
         </div>
       </div>
     </div>

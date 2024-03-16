@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { logoutSucces } from "../redux/user/userSlice";
 import { MdDashboard } from "react-icons/md";
 import { PiUsersFourFill } from "react-icons/pi";
+import { FaEuroSign } from "react-icons/fa";
 
 export default function DashSidebar() {
   const location = useLocation();
@@ -45,17 +46,33 @@ export default function DashSidebar() {
     <Sidebar className="w-full">
       <Sidebar.ItemGroup>
         <Link to="/dashboard?tab=dash">
-          <Sidebar.Item as="div" active={tab === "dash"} icon={MdDashboard}>
+          <Sidebar.Item
+            className="mb-1"
+            as="div"
+            active={tab === "dash"}
+            icon={MdDashboard}
+          >
             Dashboard
           </Sidebar.Item>
         </Link>
         <Link to="/dashboard?tab=shoppingbag">
           <Sidebar.Item
+            className="mb-1"
             as="div"
             active={tab === "shoppingbag"}
             icon={FaShoppingBag}
           >
             Shopping Bag
+          </Sidebar.Item>
+        </Link>
+        <Link to="/dashboard?tab=spese">
+          <Sidebar.Item
+            className="mb-1"
+            as="div"
+            active={tab === "spese"}
+            icon={FaEuroSign}
+          >
+            Spese
           </Sidebar.Item>
         </Link>
         <Link to="/dashboard?tab=nucleo">
@@ -70,7 +87,12 @@ export default function DashSidebar() {
       </Sidebar.ItemGroup>
       <Sidebar.ItemGroup>
         <Link to="/dashboard?tab=profile">
-          <Sidebar.Item as="div" active={tab === "profile"} icon={HiUser}>
+          <Sidebar.Item
+            className="mb-1"
+            as="div"
+            active={tab === "profile"}
+            icon={HiUser}
+          >
             Profilo
           </Sidebar.Item>
         </Link>
