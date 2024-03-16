@@ -1,5 +1,5 @@
 import { Alert, Button, Table, TextInput } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { FaRegEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
@@ -7,6 +7,8 @@ import { IoCloseCircle } from "react-icons/io5";
 import { TiTick } from "react-icons/ti";
 import { IoMdClose } from "react-icons/io";
 import { RiCheckboxCircleFill } from "react-icons/ri";
+import moment from "moment";
+import "moment/locale/it";
 
 export default function ShoppingBag() {
   const [formData, setFormData] = useState({});
@@ -17,6 +19,7 @@ export default function ShoppingBag() {
   const [editingRow, setEditingRow] = useState(null);
   const [editedValue, setEditedValue] = useState("");
   const [prevValue, setPrevValue] = useState("");
+  const [prevTasks, setPrevTasks] = useState([]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, task: e.target.value, userId: currentUser._id });
@@ -46,23 +49,36 @@ export default function ShoppingBag() {
       if (data.success === false) {
         return setErrorMessage(data.message);
       }
-      setAllTasks([...allTasks, data]);
+      setAllTasks([data, ...allTasks]);
+      setTotaleAllTasks((prev) => prev + 1);
+      setPrevTasks([data, ...allTasks]);
     } catch (error) {
       console.log(error.message);
     }
   };
 
-  useState(() => {
-    fetch(
-      `/api/task/gettasks?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        setAllTasks(data.allTasks);
-        setTotaleAllTasks(data.totalTasks);
-      })
-      .catch((err) => console.log(err));
-  }, [currentUser._id]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(
+          `/api/task/gettasks?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`
+        );
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setAllTasks(data.allTasks);
+          setPrevTasks(data.allTasks);
+          setTotaleAllTasks(data.totalTasks);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+    moment.locale("it");
+  }, [currentUser._id, currentUser.nucleo]);
 
   const handleDelete = async (task) => {
     try {
@@ -76,6 +92,8 @@ export default function ShoppingBag() {
       );
 
       setAllTasks(allTasks.filter((t) => t !== task));
+      setPrevTasks(allTasks.filter((t) => t !== task));
+      setTotaleAllTasks((prev) => prev - 1);
     } catch (error) {
       console.log(error.message);
     }
@@ -146,6 +164,7 @@ export default function ShoppingBag() {
     };
 
     setAllTasks(toggleComplete);
+    setPrevTasks(toggleComplete);
   };
 
   const handleCloseEdit = () => {
@@ -158,26 +177,77 @@ export default function ShoppingBag() {
     setEditingRow(null);
   };
 
+  const filterTask = async (e) => {
+    const datatype = e.currentTarget.dataset.type;
+
+    switch (datatype) {
+      case "complete":
+        setAllTasks(prevTasks.filter((prev) => prev.complete));
+        break;
+      case "uncomplete":
+        setAllTasks(prevTasks.filter((prev) => !prev.complete));
+        break;
+      default:
+        setAllTasks(prevTasks.filter((prev) => prev));
+        break;
+    }
+  };
+
+  const closeList = () => {
+    console.log("close");
+  };
+
   return (
-    <div>
+    <div className="px-4 space-y-5 max-w-4xl mx-auto ">
       <h2 className="text-center text-3xl mb-4">Shopping Bag</h2>
-      <form
-        onSubmit={handleSubmit}
-        className="flex gap-2 max-w-lg mx-auto px-1"
-      >
+      <form onSubmit={handleSubmit} className="flex max-w-lg mx-auto gap-2">
         <TextInput
           onChange={handleChange}
-          className="flex-1"
+          className="w-full"
           placeholder="Inserisci Articolo"
         />
         <Button type="submit">Aggiungi</Button>
       </form>
       {errorMessage && (
-        <Alert className="mt-2 max-w-lg mx-auto" color="failure">
+        <Alert className="mt-2  mx-auto" color="failure">
           {errorMessage}
         </Alert>
       )}
-      <div className="table-auto overflow-x-scroll  max-w-4xl md:mx-auto scrollbar py-5 px-1">
+      <div className="flex justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-2 mx-auto md:mx-0">
+          Tot. Articoli:
+          <span className="border px-3 py-1">{totaleTasks && totaleTasks}</span>
+        </div>
+        <div className="flex gap-2 mx-auto md:mx-0">
+          <Button
+            data-type="complete"
+            onClick={filterTask}
+            type="button"
+            className=""
+            color="green"
+          >
+            Complete ({prevTasks?.filter((task) => task.complete).length})
+          </Button>
+          <Button
+            data-type="uncomplete"
+            onClick={filterTask}
+            type="button"
+            color="red"
+            className="w-fit"
+          >
+            Non complete ({prevTasks?.filter((task) => !task.complete).length})
+          </Button>
+          <Button
+            data-type="all"
+            onClick={filterTask}
+            type="button"
+            color="blue"
+          >
+            Tutte
+          </Button>
+        </div>
+      </div>
+      <div className="table-auto overflow-x-scroll p-1 scrollbar ">
         {allTasks && allTasks?.length > 0 ? (
           <>
             <Table hoverable className="shadow-md">
@@ -201,9 +271,7 @@ export default function ShoppingBag() {
                         : ""
                     }
                   >
-                    <Table.Cell>
-                      {new Date(task.updatedAt).toLocaleDateString()}
-                    </Table.Cell>
+                    <Table.Cell>{moment(task.createdAt).fromNow()}</Table.Cell>
                     {editingRow === index ? (
                       <Table.Cell className=" font-bold">
                         <TextInput
@@ -254,6 +322,18 @@ export default function ShoppingBag() {
                 </Table.Body>
               ))}
             </Table>
+            <div className="mt-5 flex items-center justify-end">
+              <div className="flex items-center gap-6">
+                <p className="ml-auto">Hai concluso la spesa?</p>
+                <Button
+                  onClick={closeList}
+                  gradientDuoTone="greenToBlue"
+                  className="ml-auto"
+                >
+                  Chiudi lista
+                </Button>
+              </div>
+            </div>
           </>
         ) : (
           <p className="text-center">Non hai inserito alcun articolo</p>

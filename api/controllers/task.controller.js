@@ -1,11 +1,12 @@
 import { errorHandler } from "../utils/error.js";
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
-import { query } from "express";
 
 export const getTasks = async (req, res, next) => {
   try {
-    const allTasks = await Task.find({ nucleo: req.query.nucleo });
+    const allTasks = await Task.find({ nucleo: req.query.nucleo }).sort({
+      createdAt: -1,
+    });
     const totalTasks = await Task.countDocuments({ nucleo: req.query.nucleo });
 
     res.status(200).json({ allTasks, totalTasks });
@@ -41,7 +42,6 @@ export const addTask = async (req, res, next) => {
 
   try {
     await newTask.save();
-
     res.status(200).json(newTask);
   } catch (error) {
     next(error);
@@ -73,6 +73,7 @@ export const deleteTasks = async (req, res, next) => {
 
   try {
     await Task.findOneAndDelete({ nucleo: nucleo, task: task, _id: _id });
+
     res.status(200).json("La task è stata eliminata");
   } catch (error) {
     next(error);

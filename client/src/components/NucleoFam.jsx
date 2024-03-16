@@ -86,7 +86,7 @@ export default function NucleoFam() {
           setLoading(false);
         }
       } catch (error) {
-        console.log(error);
+        console.log(error.message);
         setLoading(false);
       }
     };
