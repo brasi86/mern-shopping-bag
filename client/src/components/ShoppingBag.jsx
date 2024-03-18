@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { MdEuro } from "react-icons/md";
 import { AiTwotoneEuro } from "react-icons/ai";
+import { Link } from "react-router-dom";
 
 import moment from "moment";
 import "moment/locale/it";
@@ -12,7 +13,7 @@ export default function ShoppingBag() {
   const [formData, setFormData] = useState({});
   const { currentUser } = useSelector((state) => state.user);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [allTasks, setAllTasks] = useState(null);
+  const [allTasks, setAllTasks] = useState([]);
   const [totaleTasks, setTotaleAllTasks] = useState(null);
   const [editingRow, setEditingRow] = useState(null);
   const [editedValue, setEditedValue] = useState("");
@@ -21,6 +22,8 @@ export default function ShoppingBag() {
   const [formSpesa, setFormSpesa] = useState(null);
   const [loading, setLoading] = useState(false);
   const [filterType, setFilterType] = useState(null);
+  const [alertCloseList, setAlertCloseList] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, task: e.target.value, userId: currentUser._id });
@@ -195,8 +198,20 @@ export default function ShoppingBag() {
     }
   };
 
+  const modalShow = () => {
+    setError(false);
+    setShowModal(true);
+
+    if (allTasks.length === 0) {
+      return setError(true);
+    }
+  };
   const closeList = async (e) => {
     e.preventDefault();
+
+    if (allTasks.length === 0) {
+      return;
+    }
 
     try {
       const res = await fetch(
@@ -208,10 +223,11 @@ export default function ShoppingBag() {
         }
       );
 
-      const data = await res.json();
-
       if (res.ok) {
-        console.log(data);
+        setAllTasks([]);
+        setAlertCloseList(true);
+        setShowModal(false);
+        setError(false);
       }
     } catch (error) {
       console.log(error);
@@ -291,7 +307,7 @@ export default function ShoppingBag() {
         <div className="flex items-center gap-6">
           <p className="ml-auto">Hai concluso la spesa?</p>
           <Button
-            onClick={() => setShowModal(true)}
+            onClick={modalShow}
             gradientDuoTone="greenToBlue"
             className="ml-auto"
           >
@@ -299,6 +315,13 @@ export default function ShoppingBag() {
           </Button>
         </div>
       </div>
+      {alertCloseList && (
+        <Alert color="success">
+          Spasa aggiunta alla lista delle spese.
+          <Link to="/dashboard?tab=spese"> Vai alle spese</Link>
+        </Alert>
+      )}
+
       <Modal
         show={showModal}
         onClose={() => setShowModal(false)}
@@ -326,6 +349,11 @@ export default function ShoppingBag() {
               </div>
             </form>
           </div>
+          {error && (
+            <Alert className="mt-5" color="failure">
+              Nulla da aggiungere. La lista della spesa è vuota.
+            </Alert>
+          )}
         </Modal.Body>
       </Modal>
     </div>
