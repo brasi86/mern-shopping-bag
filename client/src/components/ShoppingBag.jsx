@@ -1,24 +1,12 @@
-import {
-  Alert,
-  Button,
-  Modal,
-  Spinner,
-  Table,
-  TextInput,
-} from "flowbite-react";
+import { Alert, Button, Modal, Spinner, TextInput } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { FaRegEdit } from "react-icons/fa";
-import { MdDeleteForever } from "react-icons/md";
-import { IoCloseCircle } from "react-icons/io5";
-import { TiTick } from "react-icons/ti";
-import { IoMdClose } from "react-icons/io";
-import { RiCheckboxCircleFill } from "react-icons/ri";
 import { MdEuro } from "react-icons/md";
 import { AiTwotoneEuro } from "react-icons/ai";
 
 import moment from "moment";
 import "moment/locale/it";
+import TasksTable from "./TasksTable";
 
 export default function ShoppingBag() {
   const [formData, setFormData] = useState({});
@@ -287,109 +275,29 @@ export default function ShoppingBag() {
           </Button>
         </div>
       </div>
-      <div className="table-auto overflow-x-scroll p-1 scrollbar ">
-        {allTasks && allTasks?.length > 0 ? (
-          <>
-            <Table hoverable className="shadow-md">
-              <Table.Head className="">
-                <Table.HeadCell>Data</Table.HeadCell>
-                <Table.HeadCell>Articolo</Table.HeadCell>
-                <Table.HeadCell className="text-center">
-                  Completato
-                </Table.HeadCell>
-                <Table.HeadCell className="text-center">
-                  <span>Modifica</span>
-                </Table.HeadCell>
-                <Table.HeadCell className="text-center">Elimina</Table.HeadCell>
-              </Table.Head>
-              {allTasks
-                .filter((task) => {
-                  if (filterType === "complete") {
-                    return task.complete;
-                  } else if (filterType === "incomplete") {
-                    return !task.complete;
-                  } else {
-                    return true; // Mostra tutte le task se non c'è filtro specificato
-                  }
-                })
-                .map((task, index) => (
-                  <Table.Body key={index}>
-                    <Table.Row
-                      className={
-                        task.complete
-                          ? "bg-green-400 text-black hover:bg-green-400 dark:hover:bg-green-400"
-                          : ""
-                      }
-                    >
-                      <Table.Cell>
-                        {moment(task.createdAt).fromNow()}
-                      </Table.Cell>
-                      {editingRow === index ? (
-                        <Table.Cell className=" font-bold">
-                          <TextInput
-                            type="text"
-                            value={editedValue}
-                            onChange={handleInputChange}
-                          />
-                        </Table.Cell>
-                      ) : (
-                        <Table.Cell className=" font-bold">
-                          {task.task}
-                        </Table.Cell>
-                      )}
-
-                      <Table.Cell onClick={() => handleCompleteTask(task)}>
-                        {task.complete ? (
-                          <RiCheckboxCircleFill className=" text-green-800 w-5 h-5 mx-auto" />
-                        ) : (
-                          <IoCloseCircle className=" text-red-600 w-5 h-5 mx-auto" />
-                        )}
-                      </Table.Cell>
-
-                      {editingRow === index ? (
-                        <Table.Cell className="cursor-pointer flex gap-2 justify-center">
-                          <Button onClick={handleSaveUpdateTask}>
-                            <TiTick />
-                          </Button>
-                          <Button onClick={() => handleCloseEdit(task)}>
-                            <IoMdClose />
-                          </Button>
-                        </Table.Cell>
-                      ) : (
-                        <Table.Cell
-                          className="cursor-pointer"
-                          onClick={() => handleEdit(task, index)}
-                        >
-                          <FaRegEdit className="w-5 h-5 mx-auto" />
-                        </Table.Cell>
-                      )}
-
-                      <Table.Cell
-                        className=" cursor-pointer"
-                        onClick={() => handleDelete(task)}
-                      >
-                        <MdDeleteForever className="w-5 h-5 flex mx-auto text-red-600" />
-                      </Table.Cell>
-                    </Table.Row>
-                  </Table.Body>
-                ))}
-            </Table>
-            <div className="mt-5 flex items-center justify-end">
-              <div className="flex items-center gap-6">
-                <p className="ml-auto">Hai concluso la spesa?</p>
-                <Button
-                  onClick={() => setShowModal(true)}
-                  gradientDuoTone="greenToBlue"
-                  className="ml-auto"
-                >
-                  Chiudi lista
-                </Button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <p className="text-center">Non hai inserito alcun articolo</p>
-        )}
+      <TasksTable
+        tasks={allTasks}
+        filter={filterType}
+        editing={editingRow}
+        inputChange={handleInputChange}
+        complete={handleCompleteTask}
+        update={handleSaveUpdateTask}
+        deleted={handleDelete}
+        edit={handleEdit}
+        closeEdit={handleCloseEdit}
+        editValue={editedValue}
+      />
+      <div className="mt-5 flex items-center justify-end">
+        <div className="flex items-center gap-6">
+          <p className="ml-auto">Hai concluso la spesa?</p>
+          <Button
+            onClick={() => setShowModal(true)}
+            gradientDuoTone="greenToBlue"
+            className="ml-auto"
+          >
+            Chiudi lista
+          </Button>
+        </div>
       </div>
       <Modal
         show={showModal}
