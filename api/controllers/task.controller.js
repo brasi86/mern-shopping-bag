@@ -7,6 +7,7 @@ export const getTasks = async (req, res, next) => {
     const allTasks = await Task.find({ nucleo: req.query.nucleo }).sort({
       createdAt: -1,
     });
+
     const totalTasks = await Task.countDocuments({ nucleo: req.query.nucleo });
 
     res.status(200).json({ allTasks, totalTasks });
@@ -64,8 +65,6 @@ export const deleteTasks = async (req, res, next) => {
   });
 
   const userIds = usersInSameNucleo.map((user) => user._id);
-
-  console.log(userIds);
 
   if (!userIds.some((id) => id.toString() === userId)) {
     return next(errorHandler(403, "Non puoi eliminare questo articolo."));
