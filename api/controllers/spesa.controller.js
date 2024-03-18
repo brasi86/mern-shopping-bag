@@ -6,11 +6,14 @@ import Task from "../models/task.model.js";
 export const addSpesa = async (req, res, next) => {
   const newSpesa = new Spesa({
     nucleo: req.query.nucleo,
-    importo: req.body.spesa,
+    importo: req.body.importo,
+    articoli: req.body.articoli,
+    luogo: req.body.luogo,
   });
   try {
     await Task.deleteMany({
       nucleo: req.query.nucleo,
+      complete: true,
     });
 
     await newSpesa.save();
@@ -32,7 +35,12 @@ export const getSpese = async (req, res, next) => {
 
     const spese = await Spesa.find({ nucleo: req.query.nucleo });
 
-    res.status(200).json(spese);
+    const totaleSpese = await Spesa.aggregate([
+      { $match: { nucleo: req.query.nucleo } },
+      { $group: { _id: req.query.nucleo, total: { $sum: "$importo" } } },
+    ]);
+
+    res.status(200).json({ spese, totaleSpese });
   } catch (error) {
     next(error);
   }

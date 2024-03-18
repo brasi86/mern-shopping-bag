@@ -1,12 +1,17 @@
-import { Alert, Button, Modal, Spinner, TextInput } from "flowbite-react";
+import {
+  Alert,
+  Button,
+  Label,
+  Modal,
+  Spinner,
+  TextInput,
+} from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { MdEuro } from "react-icons/md";
 import { AiTwotoneEuro } from "react-icons/ai";
 import { Link } from "react-router-dom";
-
-import moment from "moment";
-import "moment/locale/it";
+import { SlLocationPin } from "react-icons/sl";
 import TasksTable from "./TasksTable";
 
 export default function ShoppingBag() {
@@ -26,14 +31,18 @@ export default function ShoppingBag() {
   const [error, setError] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, task: e.target.value, userId: currentUser._id });
+    setFormData({
+      ...formData,
+      task: e.target.value,
+      userId: currentUser._id,
+      pezzi: 1,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage(null);
     e.target[0].value = "";
-    setFormData({});
 
     if (!formData || !formData.task) {
       return setErrorMessage("Non hai inserito un articolo.");
@@ -82,7 +91,6 @@ export default function ShoppingBag() {
     };
 
     fetchData();
-    moment.locale("it");
   }, [currentUser._id, currentUser.nucleo]);
 
   const handleDelete = async (task) => {
@@ -145,7 +153,42 @@ export default function ShoppingBag() {
     }
   };
 
+  const updatePiece = async (e, taskId) => {
+    const updatedTasks = allTasks?.map((t) =>
+      t._id === taskId ? { ...t, pezzi: e.target.value } : t
+    );
+
+    if (updatedTasks.length > 0) {
+      setAllTasks(updatedTasks);
+    }
+
+    const updatePiece = {
+      _id: taskId,
+      pezzi: e.target.value,
+    };
+
+    try {
+      const res = await fetch(
+        `/api/task/updateTasks?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "Application/json" },
+          body: JSON.stringify(updatePiece),
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        return setErrorMessage(data.message);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   const handleCompleteTask = async (tasks) => {
+    setErrorMessage("");
     try {
       const res = await fetch(
         `/api/task/completeTasks?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`,
@@ -201,11 +244,24 @@ export default function ShoppingBag() {
   const modalShow = () => {
     setError(false);
     setShowModal(true);
+    setErrorMessage("");
+
+    setFormSpesa({
+      ...formSpesa,
+      articoli: allTasks?.filter((task) => task.complete).length,
+    });
 
     if (allTasks.length === 0) {
-      return setError(true);
+      setErrorMessage("La lista della spesa è vuota.");
+      return setShowModal(false);
+    }
+
+    if (allTasks?.filter((task) => task.complete).length === 0) {
+      setErrorMessage("Nessun articolo nel carrello confermato.");
+      return setShowModal(false);
     }
   };
+
   const closeList = async (e) => {
     e.preventDefault();
 
@@ -224,7 +280,7 @@ export default function ShoppingBag() {
       );
 
       if (res.ok) {
-        setAllTasks([]);
+        setAllTasks(allTasks.filter((t) => !t.complete));
         setAlertCloseList(true);
         setShowModal(false);
         setError(false);
@@ -243,7 +299,7 @@ export default function ShoppingBag() {
   }
   return (
     <div className="px-4 space-y-5 max-w-4xl mx-auto ">
-      <h2 className="text-center text-3xl mb-4">Shopping Bag</h2>
+      <h2 className="text-center text-3xl mb-4">Carrello della spesa</h2>
       <form onSubmit={handleSubmit} className="flex max-w-lg mx-auto gap-2">
         <TextInput
           onChange={handleChange}
@@ -302,6 +358,7 @@ export default function ShoppingBag() {
         edit={handleEdit}
         closeEdit={handleCloseEdit}
         editValue={editedValue}
+        updatePiece={updatePiece}
       />
       <div className="mt-5 flex items-center justify-end">
         <div className="flex items-center gap-6">
@@ -333,14 +390,40 @@ export default function ShoppingBag() {
         </Modal.Header>
         <Modal.Body>
           <AiTwotoneEuro className=" w-16 h-16 mx-auto text-red-500 mb-5" />
-          <div className="text-center flex flex-col gap-4">
-            <h3>Inserisci importo della tua spesa</h3>
-            <form onSubmit={closeList} className="flex flex-col gap-4">
-              <TextInput
-                onChange={(e) => setFormSpesa({ spesa: e.target.value })}
-                className=" max-w-xs mx-auto"
-                rightIcon={MdEuro}
-              />
+          <div className=" text-center flex flex-col gap-4">
+            <h3>Inserisci importo e luogo della tua spesa</h3>
+
+            <form
+              onSubmit={closeList}
+              className="flex flex-col gap-4 text-left"
+            >
+              <div className="max-w-xs mx-auto">
+                <Label>Num articoli nel carrello:</Label>
+                <TextInput
+                  value={allTasks?.filter((task) => task.complete).length}
+                  rightIcon={MdEuro}
+                  readOnly
+                />
+              </div>
+              <div className="max-w-xs mx-auto">
+                <Label>Importo:</Label>
+                <TextInput
+                  onChange={(e) =>
+                    setFormSpesa({ ...formSpesa, importo: e.target.value })
+                  }
+                  rightIcon={MdEuro}
+                />
+              </div>
+              <div className="max-w-xs mx-auto">
+                <Label>Supermercato:</Label>
+                <TextInput
+                  onChange={(e) =>
+                    setFormSpesa({ ...formSpesa, luogo: e.target.value })
+                  }
+                  className=" max-w-xs mx-auto"
+                  rightIcon={SlLocationPin}
+                />
+              </div>
               <div className="flex gap-2 justify-center">
                 <Button type="submit">Aggiungi alle spese</Button>
                 <Button onClick={() => setShowModal(false)} color="success">
@@ -351,7 +434,7 @@ export default function ShoppingBag() {
           </div>
           {error && (
             <Alert className="mt-5" color="failure">
-              Nulla da aggiungere. La lista della spesa è vuota.
+              {errorMessage}
             </Alert>
           )}
         </Modal.Body>

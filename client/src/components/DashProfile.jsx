@@ -115,12 +115,13 @@ export default function DashProfile() {
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setImageFileUpdateProgress(progress.toFixed(0));
       },
-      () => {
+      (error) => {
         setImageFileUpdateError("Il file inserito non è un immagine");
         setImageFileUpdateProgress(null);
         setImageFileUrl(null);
         setImageFile(null);
         setImageUploading(false);
+        console.log(error);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {

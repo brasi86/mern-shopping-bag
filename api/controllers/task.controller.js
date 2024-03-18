@@ -17,7 +17,7 @@ export const getTasks = async (req, res, next) => {
 };
 
 export const addTask = async (req, res, next) => {
-  const { task } = req.body;
+  const { task, pezzi } = req.body;
 
   const { userId, nucleo } = req.query;
 
@@ -39,6 +39,7 @@ export const addTask = async (req, res, next) => {
   const newTask = new Task({
     task,
     nucleo: nucleo,
+    pezzi,
   });
 
   try {
@@ -80,7 +81,7 @@ export const deleteTasks = async (req, res, next) => {
 };
 
 export const updateTasks = async (req, res, next) => {
-  const { task, _id } = req.body;
+  const { task, _id, pezzi } = req.body;
 
   const { nucleo, userId } = req.query;
 
@@ -115,7 +116,8 @@ export const updateTasks = async (req, res, next) => {
         $set: {
           task: task,
           complete: req.body.complete,
-          nucleo: nucleo,
+          nucleo,
+          pezzi,
         },
       },
       { new: true }

@@ -6,6 +6,14 @@ const spesaSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    articoli: {
+      type: Number,
+      required: true,
+    },
+    luogo: {
+      type: String,
+      required: true,
+    },
     nucleo: {
       type: String,
       required: true,

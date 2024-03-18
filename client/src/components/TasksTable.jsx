@@ -7,8 +7,7 @@ import { IoCloseCircle } from "react-icons/io5";
 import { TiTick } from "react-icons/ti";
 import { IoMdClose } from "react-icons/io";
 import { RiCheckboxCircleFill } from "react-icons/ri";
-import moment from "moment";
-import "moment/locale/it";
+import ReactTimeAgo from "react-time-ago";
 
 export default function TasksTable({
   tasks,
@@ -21,6 +20,7 @@ export default function TasksTable({
   edit,
   closeEdit,
   editValue,
+  updatePiece,
 }) {
   return (
     <div className="table-auto overflow-x-scroll p-1 scrollbar ">
@@ -30,6 +30,7 @@ export default function TasksTable({
             <Table.Head className="">
               <Table.HeadCell>Data</Table.HeadCell>
               <Table.HeadCell>Articolo</Table.HeadCell>
+              <Table.HeadCell>Num. Pezzi</Table.HeadCell>
               <Table.HeadCell className="text-center">
                 Completato
               </Table.HeadCell>
@@ -57,7 +58,9 @@ export default function TasksTable({
                         : ""
                     }
                   >
-                    <Table.Cell>{moment(task.createdAt).fromNow()}</Table.Cell>
+                    <Table.Cell>
+                      <ReactTimeAgo date={Date.parse(task.createdAt)} />
+                    </Table.Cell>
                     {editing === index ? (
                       <Table.Cell className=" font-bold">
                         <TextInput
@@ -71,6 +74,14 @@ export default function TasksTable({
                         {task.task}
                       </Table.Cell>
                     )}
+
+                    <Table.Cell>
+                      <TextInput
+                        value={task.pezzi}
+                        className="w-12"
+                        onChange={(e) => updatePiece(e, task._id)}
+                      />
+                    </Table.Cell>
 
                     <Table.Cell onClick={() => complete(task)}>
                       {task.complete ? (
@@ -110,7 +121,9 @@ export default function TasksTable({
           </Table>
         </>
       ) : (
-        <p className="text-center">Non hai inserito alcun articolo</p>
+        <p className="text-center">
+          Non hai inserito alcun articolo. Inserisci il tuo primo articolo.
+        </p>
       )}
     </div>
   );
@@ -127,4 +140,5 @@ TasksTable.propTypes = {
   edit: PropTypes.func,
   closeEdit: PropTypes.func,
   editValue: PropTypes.string,
+  updatePiece: PropTypes.func,
 };

@@ -6,6 +6,10 @@ const taskSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    pezzi: {
+      type: Number,
+      required: true,
+    },
     complete: {
       type: Boolean,
       default: false,

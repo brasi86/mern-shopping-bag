@@ -7,6 +7,12 @@ import Header from "./components/Header";
 import FooterComponent from "./components/Footer";
 import PrivateRoute from "./components/PrivateRoute";
 
+import TimeAgo from "javascript-time-ago";
+
+import it from "javascript-time-ago/locale/it";
+
+TimeAgo.addDefaultLocale(it);
+
 export default function App() {
   return (
     <BrowserRouter>
