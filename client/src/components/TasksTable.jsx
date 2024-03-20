@@ -27,7 +27,7 @@ export default function TasksTable({
       {tasks && tasks?.length > 0 ? (
         <>
           <Table hoverable className="shadow-md">
-            <Table.Head className="">
+            <Table.Head>
               <Table.HeadCell>Data</Table.HeadCell>
               <Table.HeadCell>Articolo</Table.HeadCell>
               <Table.HeadCell>Num. Pezzi</Table.HeadCell>
@@ -58,7 +58,7 @@ export default function TasksTable({
                         : ""
                     }
                   >
-                    <Table.Cell>
+                    <Table.Cell className=" min-w-32">
                       <ReactTimeAgo date={Date.parse(task.createdAt)} />
                     </Table.Cell>
                     {editing === index ? (

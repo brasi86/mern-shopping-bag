@@ -4,13 +4,27 @@ import User from "../models/user.model.js";
 import Task from "../models/task.model.js";
 
 export const addSpesa = async (req, res, next) => {
-  const newSpesa = new Spesa({
-    nucleo: req.query.nucleo,
-    importo: req.body.importo,
-    articoli: req.body.articoli,
-    luogo: req.body.luogo,
-  });
   try {
+    const articoli = await Task.find({
+      nucleo: req.query.nucleo,
+      complete: true,
+    });
+
+    const articolo = articoli.map((art) => {
+      return {
+        task: art.task,
+        pezzi: art.pezzi,
+      };
+    });
+
+    const newSpesa = new Spesa({
+      nucleo: req.query.nucleo,
+      importo: req.body.importo,
+      pezzi: req.body.pezzi,
+      articoli: articolo,
+      luogo: req.body.luogo,
+    });
+
     await Task.deleteMany({
       nucleo: req.query.nucleo,
       complete: true,

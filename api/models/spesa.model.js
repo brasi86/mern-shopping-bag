@@ -6,8 +6,12 @@ const spesaSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    articoli: {
+    pezzi: {
       type: Number,
+      required: true,
+    },
+    articoli: {
+      type: Array,
       required: true,
     },
     luogo: {

@@ -13,6 +13,7 @@ import { AiTwotoneEuro } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { SlLocationPin } from "react-icons/sl";
 import TasksTable from "./TasksTable";
+import { FaCartArrowDown } from "react-icons/fa";
 
 export default function ShoppingBag() {
   const [formData, setFormData] = useState({});
@@ -123,6 +124,7 @@ export default function ShoppingBag() {
   };
 
   const handleSaveUpdateTask = async () => {
+    setErrorMessage("");
     const updatedTasks = [...allTasks];
     updatedTasks[editingRow].task = editedValue;
 
@@ -189,6 +191,12 @@ export default function ShoppingBag() {
 
   const handleCompleteTask = async (tasks) => {
     setErrorMessage("");
+
+    const updatedTasks = allTasks.map((task) =>
+      task._id === tasks._id ? { ...task, complete: !task.complete } : task
+    );
+
+    setAllTasks(updatedTasks);
     try {
       const res = await fetch(
         `/api/task/completeTasks?userId=${currentUser._id}&nucleo=${currentUser.nucleo}`,
@@ -207,12 +215,6 @@ export default function ShoppingBag() {
     } catch (error) {
       console.log(error);
     }
-
-    const updatedTasks = allTasks.map((task) =>
-      task._id === tasks._id ? { ...task, complete: !task.complete } : task
-    );
-
-    setAllTasks(updatedTasks);
   };
 
   const handleCloseEdit = () => {
@@ -248,7 +250,7 @@ export default function ShoppingBag() {
 
     setFormSpesa({
       ...formSpesa,
-      articoli: allTasks?.filter((task) => task.complete).length,
+      pezzi: allTasks?.filter((task) => task.complete).length,
     });
 
     if (allTasks.length === 0) {
@@ -401,7 +403,7 @@ export default function ShoppingBag() {
                 <Label>Num articoli nel carrello:</Label>
                 <TextInput
                   value={allTasks?.filter((task) => task.complete).length}
-                  rightIcon={MdEuro}
+                  rightIcon={FaCartArrowDown}
                   readOnly
                 />
               </div>

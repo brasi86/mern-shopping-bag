@@ -204,7 +204,7 @@ export default function DashProfile() {
             />
           )}
           <img
-            className="rounded-full w-full object-cover"
+            className=" w-full object-cover"
             src={imageFileUrl || currentUser.profilePicture}
             alt="userPic"
           />
